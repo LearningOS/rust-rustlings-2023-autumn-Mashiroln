@@ -22,15 +22,19 @@ pub trait OtherTrait {
 }
 
 struct SomeStruct {}
+
 struct OtherStruct {}
 
 impl SomeTrait for SomeStruct {}
+
 impl OtherTrait for SomeStruct {}
+
 impl SomeTrait for OtherStruct {}
+
 impl OtherTrait for OtherStruct {}
 
 // YOU MAY ONLY CHANGE THE NEXT LINE
-fn some_func(item: ??) -> bool {
+fn some_func(item: impl SomeTrait + OtherTrait) -> bool {
     item.some_function() && item.other_function()
 }
 
