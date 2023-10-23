@@ -7,8 +7,14 @@
 
 // I AM NOT DONE
 
+use std::convert::TryInto;
+
 enum Message {
     // TODO: implement the message variant types based on their usage below
+    Move(Point),
+    Echo(String),
+    ChangeColor(i32, i32, i32),
+    Quit,
 }
 
 struct Point {
@@ -20,7 +26,7 @@ struct State {
     color: (u8, u8, u8),
     position: Point,
     quit: bool,
-    message: String
+    message: String,
 }
 
 impl State {
@@ -43,6 +49,12 @@ impl State {
         // variants
         // Remember: When passing a tuple as a function argument, you'll need
         // extra parentheses: fn function((t, u, p, l, e))
+        match message {
+            Message::ChangeColor(red, green, blue) => self.color = (red.try_into().unwrap(), green.try_into().unwrap(), blue.try_into().unwrap()),
+            Message::Echo(str) => self.message = str,
+            Message::Move(point) => self.position = point,
+            Message::Quit => self.quit = true,
+        }
     }
 }
 
