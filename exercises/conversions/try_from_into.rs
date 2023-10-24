@@ -38,9 +38,23 @@ enum IntoColorError {
 // that correct RGB color values must be integers in the 0..=255 range.
 
 // Tuple implementation
+fn check_range(num: i16) -> bool {
+    num >= 0 && num <= 255
+}
+
 impl TryFrom<(i16, i16, i16)> for Color {
     type Error = IntoColorError;
     fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {
+        let (x, y, z) = tuple;
+        return if check_range(x) && check_range(y) && check_range(z) {
+            Ok(Color {
+                red: x as u8,
+                green: y as u8,
+                blue: z as u8,
+            })
+        } else {
+            Err(IntoColorError::IntConversion)
+        };
     }
 }
 
@@ -48,6 +62,16 @@ impl TryFrom<(i16, i16, i16)> for Color {
 impl TryFrom<[i16; 3]> for Color {
     type Error = IntoColorError;
     fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {
+        let [x, y, z] = arr;
+        return if check_range(x) && check_range(y) && check_range(z) {
+            Ok(Color {
+                red: x as u8,
+                green: y as u8,
+                blue: z as u8,
+            })
+        } else {
+            Err(IntoColorError::IntConversion)
+        };
     }
 }
 
@@ -55,6 +79,16 @@ impl TryFrom<[i16; 3]> for Color {
 impl TryFrom<&[i16]> for Color {
     type Error = IntoColorError;
     fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
+        let [x, y, z] = slice else { return Err(IntoColorError::BadLen); };
+        return if check_range(*x) && check_range(*y) && check_range(*z) {
+            Ok(Color {
+                red: *x as u8,
+                green: *y as u8,
+                blue: *z as u8,
+            })
+        } else {
+            Err(IntoColorError::IntConversion)
+        };
     }
 }
 
@@ -87,6 +121,7 @@ mod tests {
             Err(IntoColorError::IntConversion)
         );
     }
+
     #[test]
     fn test_tuple_out_of_range_negative() {
         assert_eq!(
@@ -94,6 +129,7 @@ mod tests {
             Err(IntoColorError::IntConversion)
         );
     }
+
     #[test]
     fn test_tuple_sum() {
         assert_eq!(
@@ -101,6 +137,7 @@ mod tests {
             Err(IntoColorError::IntConversion)
         );
     }
+
     #[test]
     fn test_tuple_correct() {
         let c: Result<Color, _> = (183, 65, 14).try_into();
@@ -110,25 +147,29 @@ mod tests {
             Color {
                 red: 183,
                 green: 65,
-                blue: 14
+                blue: 14,
             }
         );
     }
+
     #[test]
     fn test_array_out_of_range_positive() {
         let c: Result<Color, _> = [1000, 10000, 256].try_into();
         assert_eq!(c, Err(IntoColorError::IntConversion));
     }
+
     #[test]
     fn test_array_out_of_range_negative() {
         let c: Result<Color, _> = [-10, -256, -1].try_into();
         assert_eq!(c, Err(IntoColorError::IntConversion));
     }
+
     #[test]
     fn test_array_sum() {
         let c: Result<Color, _> = [-1, 255, 255].try_into();
         assert_eq!(c, Err(IntoColorError::IntConversion));
     }
+
     #[test]
     fn test_array_correct() {
         let c: Result<Color, _> = [183, 65, 14].try_into();
@@ -138,10 +179,11 @@ mod tests {
             Color {
                 red: 183,
                 green: 65,
-                blue: 14
+                blue: 14,
             }
         );
     }
+
     #[test]
     fn test_slice_out_of_range_positive() {
         let arr = [10000, 256, 1000];
@@ -150,6 +192,7 @@ mod tests {
             Err(IntoColorError::IntConversion)
         );
     }
+
     #[test]
     fn test_slice_out_of_range_negative() {
         let arr = [-256, -1, -10];
@@ -158,6 +201,7 @@ mod tests {
             Err(IntoColorError::IntConversion)
         );
     }
+
     #[test]
     fn test_slice_sum() {
         let arr = [-1, 255, 255];
@@ -166,6 +210,7 @@ mod tests {
             Err(IntoColorError::IntConversion)
         );
     }
+
     #[test]
     fn test_slice_correct() {
         let v = vec![183, 65, 14];
@@ -176,15 +221,17 @@ mod tests {
             Color {
                 red: 183,
                 green: 65,
-                blue: 14
+                blue: 14,
             }
         );
     }
+
     #[test]
     fn test_slice_excess_length() {
         let v = vec![0, 0, 0, 0];
         assert_eq!(Color::try_from(&v[..]), Err(IntoColorError::BadLen));
     }
+
     #[test]
     fn test_slice_insufficient_length() {
         let v = vec![0, 0];
