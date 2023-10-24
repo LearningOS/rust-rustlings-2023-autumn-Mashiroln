@@ -5,8 +5,6 @@
 
 // I AM NOT DONE
 
-use std::intrinsics::try;
-
 struct Point {
     x: i32,
     y: i32,
